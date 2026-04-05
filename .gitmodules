@@ -1,0 +1,6 @@
+[submodule "plugins/web_video_server"]
+	path = plugins/web_video_server
+	url = https://github.com/RobotWebTools/web_video_server.git
+[submodule "plugins/yolo_ros"]
+	path = plugins/yolo_ros
+	url = https://github.com/mgonzs13/yolo_ros.git

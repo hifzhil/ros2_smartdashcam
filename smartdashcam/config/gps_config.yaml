@@ -1,0 +1,5 @@
+
+nmea_serial_driver:
+  ros__parameters:
+    port: /dev/ttyUSB1
+    baud: 115200

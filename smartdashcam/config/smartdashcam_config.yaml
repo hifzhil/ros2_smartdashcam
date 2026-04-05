@@ -1,0 +1,85 @@
+device:
+  ros__parameters:
+    dashcam_id: "${DASHCAM_ID}"
+    device_id: "${HOSTNAME}"
+    ruas_id: "001"
+    timezone: "UTC"
+
+anomaly_detector:
+  ros__parameters:
+    # Basic settings
+    dashcam_id: "${DASHCAM_ID}"
+    device_id: "${HOSTNAME}"
+    ruas_id: "001"
+    timezone: "UTC"
+    
+    # Detection settings
+    debug_mode: false
+    velocity_threshold: 5.0
+    time_threshold: 10.0
+    image_width: 640
+    image_height: 320
+    gcs_bucket: "dashcam-sinatra"
+
+mqtt:
+  ros__parameters:
+    broker:
+      host: "test.mosquitto.org"
+      port: 1883
+      user: "your_username"
+      pass: "your_password"
+    dashcam_id: "${DASHCAM_ID}"
+    topics:
+      log_trip: "DashCam/log-trip"
+      log_vision: "DashCam/log-vision"
+      log_anomaly: "DashCam/log-vision-anomaly"
+
+bridge:
+  ros__parameters:
+    ros2mqtt:
+      ros_topics:
+        - "/smartdashcam/gps"
+        - "/smartdashcam/vision"
+        - "/smartdashcam/anomaly"
+      "/smartdashcam/gps":
+        mqtt_topic: "DashCam/log-trip"
+        primitive: false
+        ros_type: "std_msgs/msg/String"
+        inject_timestamp: false
+        advanced:
+          ros:
+            queue_size: 10
+            qos:
+              reliability: "reliable"
+              durability: "transient_local"
+          mqtt:
+            qos: 2
+            retained: false
+      "/smartdashcam/vision":
+        mqtt_topic: "DashCam/log-vision"
+        primitive: false
+        ros_type: "std_msgs/msg/String"
+        inject_timestamp: false
+        advanced:
+          ros:
+            queue_size: 10
+            qos:
+              reliability: "reliable"
+              durability: "transient_local"
+          mqtt:
+            qos: 2
+            retained: false
+      "/smartdashcam/anomaly":
+        mqtt_topic: "DashCam/log-vision-anomaly"
+        primitive: false
+        ros_type: "std_msgs/msg/String"
+        inject_timestamp: false
+        advanced:
+          ros:
+            queue_size: 10
+            qos:
+              reliability: "reliable"
+              durability: "transient_local"
+          mqtt:
+            qos: 2
+            retained: false

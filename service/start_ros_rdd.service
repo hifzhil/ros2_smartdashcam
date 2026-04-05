@@ -1,0 +1,17 @@
+[Unit]
+Description=ROS2 Road Damage Detector Service
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=YOUR_USERNAME
+Environment="ROS_DOMAIN_ID=0"
+Environment="PYTHONUNBUFFERED=1"
+WorkingDirectory=/home/hifzhil/jazzy_ws
+ExecStart=/bin/bash -c 'source /opt/ros/jazzy/setup.bash && source /home/hifzhil/jazzy_ws/install/setup.bash && ros2 run rdd_detector rdd_detector'
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

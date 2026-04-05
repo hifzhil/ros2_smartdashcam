@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-24.04
+    env:
+      ROS_DISTRO: jazzy
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Placeholder TLS and model files
+        run: |
+          mkdir -p smartdashcam/config/.crt smartdashcam/config/model
+          printf 'PLACEHOLDER_CI\n' > smartdashcam/config/.crt/ca.crt
+          printf 'PLACEHOLDER_CI\n' > smartdashcam/config/.crt/client.crt
+          printf 'PLACEHOLDER_CI\n' > smartdashcam/config/.crt/client.key
+          : > smartdashcam/config/model/your_model.pt
+          : > smartdashcam/config/model/full_model.h5
+
+      - name: Setup ROS 2
+        uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: jazzy
+
+      - name: Rosdep install
+        run: |
+          sudo rosdep init || true
+          rosdep update
+          source /opt/ros/jazzy/setup.bash
+          rosdep install --rosdistro "$ROS_DISTRO" --from-paths . --ignore-src -r -y
+
+      - name: Create colcon workspace
+        run: |
+          WS="${{ runner.temp }}/colcon_ws"
+          mkdir -p "$WS/src"
+          ln -s "${{ github.workspace }}" "$WS/src/ros2_smartdashcam"
+          echo "COLCON_WS=$WS" >> "$GITHUB_ENV"
+
+      - name: Build
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          cd "$COLCON_WS"
+          colcon build \
+            --symlink-install \
+            --packages-up-to smartdashcam yolo_smartdashcam rdd_detector \
+            --cmake-args -DCMAKE_BUILD_TYPE=Release
+
+      - name: Test
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          cd "$COLCON_WS"
+          source install/setup.bash
+          colcon test \
+            --packages-select smartdashcam smartdashcam_msgs yolo_smartdashcam rdd_detector \
+            --event-handlers console_cohesion+
+          colcon test-result --verbose

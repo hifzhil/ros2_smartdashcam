@@ -1,0 +1,21 @@
+gscam_publisher:
+  ros__parameters:
+    gscam_config: "rtspsrc location=rtsp://192.168.0.1:554/livestream/12 \
+      latency=0 \
+      drop-on-latency=true \
+      retry=5 \
+      udp-reconnect=1 \
+      buffer-mode=4 \
+      ! rtph264depay \
+      ! h264parse \
+      ! queue max-size-buffers=8192 max-size-bytes=0 max-size-time=0 leaky=downstream \
+      ! avdec_h264 max-threads=8 \
+      ! videoconvert n-threads=8 qos=true \
+      ! video/x-raw,format=RGB \
+      ! videoscale ! video/x-raw,width=640,height=360 \
+      ! queue"
+    preroll: False
+    use_gst_timestamps: True
+    camera_name: 'my_camera'
+    frame_id: 'my_camera_frame'
+    sync_sink: True

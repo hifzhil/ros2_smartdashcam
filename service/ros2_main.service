@@ -1,0 +1,15 @@
+[Unit]
+Description=Start ROS 2 Launch File
+After=network.target
+
+[Service]
+Type=simple
+ExecStartPre=/bin/sleep 10
+ExecStart=/home/hifzhil/jazzy_ws/src/ros2_smartdashcam/script/start_ros_main.sh
+Restart=on-failure
+RestartSec=5
+User=pi
+Environment=DISPLAY=:0
+
+[Install]
+WantedBy=multi-user.target
